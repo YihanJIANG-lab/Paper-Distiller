@@ -1,0 +1,139 @@
+# Discipline Schema: Computer Science / AI
+# Default schema — matches existing hardcoded behavior
+
+discipline_family: cs
+display_name: "Computer Science / AI"
+default_venues: ["NeurIPS", "ICML", "ICLR", "AAAI", "ACL", "SIGMOD", "VLDB", "KDD"]
+
+# ---------------------------------------------------------------
+# Layer 1: Rigor Facets — what to extract & how to aggregate
+# ---------------------------------------------------------------
+layer1_rigor:
+  system_prompt: >
+    You are an expert ML research methodology analyst.
+    Read the paper content and extract its experimental methodology facets.
+
+  # Boolean facets to extract (field_name → prompt description)
+  boolean_facets:
+    has_pretrained_baseline: "does the paper compare against pretrained models (GPT, LLaMA, BERT, T5, CLIP, etc.)"
+    has_ablation: "does the paper include ablation studies removing key components"
+    has_real_data: "does the paper use real-world datasets (not purely synthetic)"
+    reports_std: "does the paper report standard deviation or confidence intervals"
+    has_statistical_test: "does the paper perform statistical significance tests (t-test, bootstrap, etc.)"
+    planning_reasoning: "does the paper involve planning, reasoning, or hierarchical task decomposition"
+    multi_agent: "does the paper study multi-agent systems or single-agent only"
+
+  # Categorical / list facets
+  list_facets:
+    baseline_types:
+      prompt: "list of baseline categories used"
+      options: ["pretrained_model", "heuristic", "rule_based", "random", "fine_tuned", "none"]
+    dataset_names:
+      prompt: "list of specific dataset/benchmark names mentioned"
+    methodology_keywords:
+      prompt: "list of key technique/method names from the paper"
+    agent_frameworks:
+      prompt: "list of agent frameworks used: ReAct, Reflexion, AutoGPT, LangChain, etc."
+    domain_specific_practices:
+      prompt: "list of domain-specific practices"
+
+  enum_facets:
+    data_type:
+      prompt: "type of data used"
+      options: ["real", "synthetic", "simulated", "mixed"]
+
+  int_facets:
+    num_seeds_mentioned: "number of random seeds used in experiments (null if not mentioned)"
+
+  # Aggregation: which boolean facets become percentage stats
+  aggregation_pct_fields:
+    - field: has_pretrained_baseline
+      label: "use pretrained baselines"
+    - field: has_ablation
+      label: "include ablation studies"
+    - field: has_real_data
+      label: "use real data"
+    - field: reports_std
+      label: "report std/variance"
+
+  # Skill file display labels
+  skill_extra_lines:
+    - stat: pct_pretrained_baseline
+      template: "- {pct:.0%} use pretrained baselines"
+    - stat: pct_ablation
+      template: "- {pct:.0%} include ablation studies"
+    - stat: pct_real_data
+      template: "- {pct:.0%} use real data"
+    - stat: pct_reports_std
+      template: "- {pct:.0%} report std/variance"
+
+# ---------------------------------------------------------------
+# Layer 2: Idea DNA — novelty types & gap classification
+# ---------------------------------------------------------------
+layer2_idea_dna:
+  novelty_types:
+    incremental: "improves one component of an existing approach while keeping the core framework unchanged"
+    new_formulation: "introduces a new mathematical formulation, theoretical framework, or learning objective"
+    new_application: "applies a well-established method to a genuinely new task, domain, or data modality"
+    paradigm_shift: "challenges or overturns a widely-held assumption in the field"
+
+  novelty_examples:
+    incremental: ["we add layer normalization to the Transformer", "we replace ReLU with GELU"]
+    new_formulation: ["we reformulate RL as inference in a probabilistic program", "we derive a new loss function based on infoNCE"]
+    new_application: ["we show that CLIP-style pre-training works for robot learning", "we adapt chain-of-thought prompting to mathematical reasoning"]
+    paradigm_shift: ["we show that attention is not necessary; a simple MLP outperforms it", "we challenge the modularity assumption"]
+
+  # How to frame gap→hypothesis extraction
+  gap_hypothesis_prompt_context: >
+    Focus on the technical research gap: what algorithmic, architectural, or
+    methodological limitation does the paper address?
+
+# ---------------------------------------------------------------
+# Layer 3: Narrative Structure — figure types & section patterns
+# ---------------------------------------------------------------
+layer3_narrative:
+  expected_figure_types:
+    - training_curve
+    - bar_comparison
+    - ablation_table
+    - qualitative_examples
+    - architecture_diagram
+    - performance_table
+    - pipeline_diagram
+    - line_plot
+    - scalability_plot
+    - latency_bar_chart
+
+  expected_discussion_elements:
+    - limitations
+    - future_work
+    - broader_impact
+    - failure_cases
+    - reproducibility
+
+  related_work_strategies:
+    - by_subfield
+    - chronological
+    - by_method_type
+    - integrated_in_intro
+    - in_appendix
+    - dedicated_section_before_method
+    - dedicated_section
+
+# ---------------------------------------------------------------
+# Layer 4: Rejection — prompt framing for review extraction
+# ---------------------------------------------------------------
+layer4_rejection:
+  review_source: "OpenReview"
+  rejection_categories:
+    - writing_clarity
+    - novelty_insufficient
+    - dataset_limitation
+    - scalability_concern
+    - baseline_missing
+    - motivation_weak
+    - reproducibility
+    - ablation_missing
+    - experiment_insufficient
+    - overclaimed
+    - theoretical_gap

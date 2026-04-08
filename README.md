@@ -1,8 +1,12 @@
 # Paper-Distiller
 
+[English](README.md) | [中文](README_zh.md)
+
 Paper-Distiller packages a reusable venue distillation workflow as a workspace skill.
 
 The current repository contains one skill, `venue-distillation`, for turning accepted and rejected papers from a target venue into structured guidance that an AI research pipeline can reuse during idea generation, paper drafting, and revision.
+
+**Multi-Discipline Support:** The distillation engine supports discipline-specific schemas via YAML configuration. Currently available schemas: Computer Science / AI (default) and Economics / Finance / Management. New disciplines can be added by creating a YAML file — no code changes required.
 
 ## What This Skill Does
 
@@ -24,7 +28,12 @@ The skill covers an end-to-end loop:
       references/
         collection-sources.md
         data-schemas.md
+        discipline_schema.py        # YAML schema loader module
+        discipline-schemas/
+          cs.yaml                    # CS/AI default schema
+          economics.yaml             # Economics/Finance/Management schema
         distillation-design.md
+        multi-discipline.md          # Multi-discipline design doc
         openreview-api.md
         rejection-analysis.md
         skill-file-format.md
@@ -38,6 +47,12 @@ Then ask for a venue distillation workflow in natural language, for example:
 
 ```text
 Use the venue-distillation skill for NeurIPS 2025 on LLM Agents.
+```
+
+For non-CS disciplines:
+
+```text
+Use the venue-distillation skill with economics schema for Energy Economics on carbon emissions estimation.
 ```
 
 Or:
@@ -83,12 +98,14 @@ That file describes:
 
 ## Reference Files
 
-- [.github/skills/venue-distillation/references/data-schemas.md](.github/skills/venue-distillation/references/data-schemas.md): accepted/rejected paper JSON schemas
-- [.github/skills/venue-distillation/references/collection-sources.md](.github/skills/venue-distillation/references/collection-sources.md): source coverage and collection strategy
-- [.github/skills/venue-distillation/references/openreview-api.md](.github/skills/venue-distillation/references/openreview-api.md): OpenReview v1/v2 usage details
-- [.github/skills/venue-distillation/references/distillation-design.md](.github/skills/venue-distillation/references/distillation-design.md): accepted-paper distillation design
-- [.github/skills/venue-distillation/references/rejection-analysis.md](.github/skills/venue-distillation/references/rejection-analysis.md): rejected-paper weakness extraction
-- [.github/skills/venue-distillation/references/skill-file-format.md](.github/skills/venue-distillation/references/skill-file-format.md): output skill anatomy and tag layout
+- [Data Schemas](.github/skills/venue-distillation/references/data-schemas.md): accepted/rejected paper JSON schemas
+- [Collection Sources](.github/skills/venue-distillation/references/collection-sources.md): source coverage and collection strategy
+- [OpenReview API](.github/skills/venue-distillation/references/openreview-api.md): OpenReview v1/v2 usage details
+- [Distillation Design](.github/skills/venue-distillation/references/distillation-design.md): accepted-paper distillation design
+- [Multi-Discipline Design](.github/skills/venue-distillation/references/multi-discipline.md): schema system for cross-discipline distillation
+- [Rejection Analysis](.github/skills/venue-distillation/references/rejection-analysis.md): rejected-paper weakness extraction
+- [Skill File Format](.github/skills/venue-distillation/references/skill-file-format.md): output skill anatomy and tag layout
+- [Discipline Schemas](.github/skills/venue-distillation/references/discipline-schemas/): YAML configuration files per discipline family
 
 ## Intended Outcome
 

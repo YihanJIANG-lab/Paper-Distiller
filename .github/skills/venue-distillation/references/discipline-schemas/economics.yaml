@@ -1,0 +1,199 @@
+# Discipline Schema: Economics / Finance / Management
+# Tailored for journals like Energy Economics, JFE, MS, etc.
+
+discipline_family: economics
+display_name: "Economics / Finance / Management"
+default_venues: ["Energy Economics", "Journal of Financial Economics", "Management Science",
+                 "Review of Financial Studies", "Journal of Econometrics",
+                 "American Economic Review", "Quarterly Journal of Economics",
+                 "Journal of Cleaner Production", "Ecological Economics"]
+
+# ---------------------------------------------------------------
+# Layer 1: Rigor Facets — economics-specific methodology extraction
+# ---------------------------------------------------------------
+layer1_rigor:
+  system_prompt: >
+    You are an expert economics/finance research methodology analyst.
+    Read the paper content and extract its empirical methodology facets.
+    Focus on econometric rigor, identification strategy, and robustness.
+
+  # Boolean facets to extract (field_name → prompt description)
+  boolean_facets:
+    has_robustness_check: "does the paper include robustness checks (alternative specifications, different samples, different time periods, etc.)"
+    has_endogeneity_treatment: "does the paper address endogeneity (instrumental variables, DID, RDD, PSM, Heckman, GMM, natural experiment, etc.)"
+    has_heterogeneity_analysis: "does the paper perform heterogeneity / subsample analysis (by group, industry, country, size, etc.)"
+    has_out_of_sample_test: "does the paper evaluate models on held-out / out-of-sample / out-of-time data"
+    has_cross_validation: "does the paper use k-fold cross-validation or similar resampling methods"
+    has_panel_data: "does the paper use panel / longitudinal data with firm-year or country-year observations"
+    has_fixed_effects: "does the paper use fixed effects (firm, year, industry, country fixed effects)"
+    has_placebo_test: "does the paper include placebo / falsification tests"
+    has_feature_importance: "does the paper report feature importance / variable importance / SHAP values"
+    uses_ml_model: "does the paper use machine learning models (random forest, XGBoost, neural network, etc.) rather than only OLS/logit"
+    has_benchmark_comparison: "does the paper systematically compare multiple models or methods"
+
+  # Categorical / list facets
+  list_facets:
+    model_types:
+      prompt: "list of model types used"
+      options: ["OLS", "panel_regression", "logit_probit", "IV_2SLS", "GMM", "DID",
+                "RDD", "PSM", "random_forest", "XGBoost", "LightGBM", "neural_network",
+                "transformer", "LASSO", "ridge", "elastic_net", "SVM", "KNN",
+                "VAR", "GARCH", "structural_equation", "bayesian", "other"]
+    dataset_names:
+      prompt: "list of specific database or dataset names (e.g., Compustat, CRSP, Trucost, CDP, Bloomberg, World Bank, Penn World Table)"
+    dependent_variables:
+      prompt: "list of dependent / target variables (e.g., carbon emissions, stock returns, firm value, ROA)"
+    key_independent_variables:
+      prompt: "list of key independent / explanatory variables or features"
+    identification_strategy:
+      prompt: "list of identification/causal inference strategies used"
+      options: ["IV", "DID", "RDD", "PSM", "natural_experiment", "Heckman", "GMM", "Granger_causality", "none_observational"]
+    methodology_keywords:
+      prompt: "list of key methodology or technique names from the paper"
+
+  enum_facets:
+    data_type:
+      prompt: "type of data used"
+      options: ["cross_sectional", "panel", "time_series", "mixed", "experimental"]
+    data_granularity:
+      prompt: "level of data observation"
+      options: ["firm_level", "country_level", "industry_level", "plant_level", "individual_level", "mixed"]
+
+  int_facets:
+    sample_size: "total number of observations (firm-years, country-years, etc.) — estimate if not stated"
+    num_countries: "number of countries or regions in the sample (null if single-country)"
+    time_span_years: "number of years covered by the sample"
+
+  # Aggregation: which boolean facets become percentage stats
+  aggregation_pct_fields:
+    - field: has_robustness_check
+      label: "include robustness checks"
+    - field: has_endogeneity_treatment
+      label: "address endogeneity"
+    - field: has_heterogeneity_analysis
+      label: "include heterogeneity analysis"
+    - field: has_out_of_sample_test
+      label: "include out-of-sample evaluation"
+    - field: has_panel_data
+      label: "use panel data"
+    - field: has_fixed_effects
+      label: "use fixed effects"
+    - field: has_placebo_test
+      label: "include placebo/falsification tests"
+    - field: has_benchmark_comparison
+      label: "compare multiple models"
+    - field: uses_ml_model
+      label: "employ machine learning models"
+    - field: has_feature_importance
+      label: "report feature importance"
+    - field: has_cross_validation
+      label: "use cross-validation"
+
+  # Skill file display labels
+  skill_extra_lines:
+    - stat: has_robustness_check
+      template: "- {pct:.0%} include robustness checks"
+    - stat: has_endogeneity_treatment
+      template: "- {pct:.0%} address endogeneity (IV/DID/RDD/PSM)"
+    - stat: has_heterogeneity_analysis
+      template: "- {pct:.0%} include heterogeneity/subsample analysis"
+    - stat: has_out_of_sample_test
+      template: "- {pct:.0%} include out-of-sample evaluation"
+    - stat: has_panel_data
+      template: "- {pct:.0%} use panel data"
+    - stat: has_fixed_effects
+      template: "- {pct:.0%} use fixed effects"
+    - stat: has_placebo_test
+      template: "- {pct:.0%} include placebo/falsification tests"
+    - stat: has_benchmark_comparison
+      template: "- {pct:.0%} compare multiple models"
+    - stat: uses_ml_model
+      template: "- {pct:.0%} employ ML models"
+
+# ---------------------------------------------------------------
+# Layer 2: Idea DNA — economics-specific novelty types
+# ---------------------------------------------------------------
+layer2_idea_dna:
+  novelty_types:
+    new_empirical_evidence: "provides first or most comprehensive empirical evidence on a question using new data, new sample, or new geography"
+    new_identification_strategy: "introduces a novel causal identification approach or exploits a new natural experiment / instrument"
+    new_methodology: "proposes a new econometric method, estimation technique, or ML-based prediction framework"
+    new_application: "applies an established method to a genuinely new domain, policy question, or data type"
+    new_theoretical_mechanism: "develops or tests a new theoretical channel / causal mechanism explaining an empirical phenomenon"
+    incremental: "extends prior work with minor modifications (additional controls, longer time period, different sample)"
+
+  novelty_examples:
+    new_empirical_evidence: ["first large-scale cross-country comparison of corporate carbon estimation", "first study using satellite data to validate corporate emissions reports"]
+    new_identification_strategy: ["we exploit a regulatory shock as a natural experiment", "we use shift-share IV to identify the causal effect"]
+    new_methodology: ["we propose a transfer learning framework for cross-country generalization", "we develop a novel ensemble method combining ML with econometric interpretability"]
+    new_application: ["we apply contrastive learning to firm-year panel data for emissions prediction", "we adapt NLP-based carbon disclosure analysis to emerging markets"]
+    new_theoretical_mechanism: ["we theorize that data quality mediates the transfer learning effectiveness via institutional quality channel", "we show that governance quality moderates the carbon-performance link"]
+    incremental: ["we add additional controls for governance quality", "we extend the sample to include 10 more developing countries"]
+
+  # How to frame gap→hypothesis extraction — economics style
+  gap_hypothesis_prompt_context: >
+    Focus on the empirical research gap: what data limitation, methodological
+    shortcoming, or lack of evidence does the paper address? In economics,
+    gaps are often about: (1) missing cross-country evidence, (2) unaddressed
+    endogeneity, (3) unexplored moderating/mediating mechanisms, (4) lack of
+    out-of-sample validation, or (5) data scarcity in specific regions.
+
+# ---------------------------------------------------------------
+# Layer 3: Narrative Structure — economics-specific patterns
+# ---------------------------------------------------------------
+layer3_narrative:
+  expected_figure_types:
+    - regression_table
+    - summary_statistics_table
+    - correlation_matrix
+    - coefficient_plot
+    - bar_comparison
+    - scatter_plot
+    - time_series_plot
+    - heat_map
+    - robustness_table
+    - heterogeneity_table
+    - event_study_plot
+    - distribution_histogram
+    - flowchart
+    - architecture_diagram
+    - feature_importance_plot
+    - performance_comparison_table
+    - boxplot_violin
+
+  expected_discussion_elements:
+    - limitations
+    - future_work
+    - policy_implications
+    - managerial_implications
+    - theoretical_contributions
+    - practical_contributions
+    - robustness_discussion
+
+  related_work_strategies:
+    - dedicated_section
+    - integrated_in_intro
+    - by_research_stream
+    - chronological
+    - by_methodology
+
+# ---------------------------------------------------------------
+# Layer 4: Rejection — economics-specific review patterns
+# ---------------------------------------------------------------
+layer4_rejection:
+  review_source: "peer_review_general"
+  rejection_categories:
+    - writing_clarity
+    - novelty_insufficient
+    - endogeneity_unaddressed
+    - sample_selection_bias
+    - robustness_inadequate
+    - identification_weak
+    - motivation_weak
+    - literature_gap_unconvincing
+    - generalizability_concern
+    - variable_measurement_issue
+    - theoretical_framework_missing
+    - policy_relevance_unclear
+    - data_quality_concern
+    - overclaimed

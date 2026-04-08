@@ -1,6 +1,6 @@
 ---
 name: venue-distillation
-description: 'Distill accepted and rejected papers from a conference/journal into structured skills for AI agent paper writing. Use when: setting up a new research topic, preparing for a new venue submission, bootstrapping agent knowledge for a conference (NeurIPS, ICML, ICLR, ACL, EMNLP, CVPR, etc.), building a corpus of positive/negative writing examples, extracting reviewer preference patterns. Covers: paper collection from OpenReview/Semantic Scholar/OpenAlex, 3-layer LLM-based distillation (rigor/idea/narrative), rejected paper heuristic analysis, skill file generation, and pipeline injection.'
+description: 'Distill accepted and rejected papers from a conference/journal into structured skills for AI agent paper writing. Use when: setting up a new research topic, preparing for a new venue submission, bootstrapping agent knowledge for a conference or journal (NeurIPS, ICML, ICLR, ACL, EMNLP, CVPR, Energy Economics, JFE, Management Science, etc.), building a corpus of positive/negative writing examples, extracting reviewer preference patterns. Covers: paper collection from OpenReview/Semantic Scholar/OpenAlex, 5-layer distillation (rigor/idea/narrative/rejection/citation), multi-discipline schema support (CS, Economics, and extensible), skill file generation, and pipeline injection.'
 argument-hint: 'Target venue name and topic (e.g., "NeurIPS 2025, LLM Agents")'
 ---
 
@@ -122,6 +122,7 @@ See [rejected paper schema](./references/data-schemas.md#rejected-paper-schema) 
 ### Step 4: Distill Accepted Papers (LLM-based, 3 layers)
 
 ```bash
+# For CS/AI venues (default):
 python -c "
 import sys; sys.path.insert(0, '.')
 from pipeline.rigor_distiller import RigorDistiller
@@ -131,7 +132,20 @@ rd = RigorDistiller(Path('.'))
 result = rd.distill_all('topic_N', n_papers=30, model='claude-opus-4-6')
 print(f'Distilled {result.n_papers_analyzed} papers')
 "
+
+# For Economics/Finance/Management journals:
+python -c "
+import sys; sys.path.insert(0, '.')
+from pipeline.rigor_distiller import RigorDistiller
+from pathlib import Path
+
+rd = RigorDistiller(Path('.'), discipline_family='economics')
+result = rd.distill_all('topic_N', n_papers=30, model='claude-opus-4-6')
+print(f'Distilled {result.n_papers_analyzed} papers')
+"
 ```
+
+The `discipline_family` parameter loads a discipline-specific YAML schema that tailors all 5 layers. See [multi-discipline design](./references/multi-discipline.md).
 
 This performs a **single unified LLM call per paper** extracting 3 layers simultaneously.
 
@@ -225,3 +239,7 @@ pipeline/skills/{topic_id}.md           ← Step 6 (packaged skill)
 - [3-Layer Distillation Design](./references/distillation-design.md) — LLM prompts, dataclasses, aggregation logic
 - [Rejection Analysis Design](./references/rejection-analysis.md) — Regex patterns, metrics, comparison methodology
 - [Skill File Format](./references/skill-file-format.md) — Anatomy of a generated skill .md file
+- [Multi-Discipline Design](./references/multi-discipline.md) — Schema system for cross-discipline distillation
+- [Discipline Schema Loader](./references/discipline_schema.py) — Python module for loading YAML schemas
+- [CS Schema](./references/discipline-schemas/cs.yaml) — Computer Science / AI default schema
+- [Economics Schema](./references/discipline-schemas/economics.yaml) — Economics / Finance / Management schema
