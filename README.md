@@ -14,9 +14,10 @@ The skill covers an end-to-end loop:
 
 1. Collect accepted papers from sources such as OpenAlex, Semantic Scholar, and OpenReview.
 2. Collect rejected papers and reviews from OpenReview.
-3. Distill accepted papers into rigor, idea, and narrative patterns.
-4. Distill rejected papers into reviewer-facing anti-patterns.
-5. Package the result into a skill file that can be injected into an agent pipeline.
+3. Distill accepted papers into rigor, idea, and narrative patterns (Layers 1-3, LLM-based).
+4. Distill rejected papers into reviewer-facing anti-patterns (Layer 4, rule-based).
+5. Extract citation & reference patterns from full text and API metadata (Layer 5, rule-based, no LLM cost).
+6. Package the result into a 5-layer skill file that can be injected into an agent pipeline.
 
 ## Repository Layout
 
@@ -92,7 +93,7 @@ That file describes:
 
 - when to use the skill
 - required inputs
-- the 4-phase methodology
+- the 5-layer methodology (rigor/idea/narrative/rejection/citation)
 - output artifacts
 - how the distilled patterns are injected into a writing pipeline
 
@@ -101,10 +102,10 @@ That file describes:
 - [Data Schemas](.github/skills/venue-distillation/references/data-schemas.md): accepted/rejected paper JSON schemas
 - [Collection Sources](.github/skills/venue-distillation/references/collection-sources.md): source coverage and collection strategy
 - [OpenReview API](.github/skills/venue-distillation/references/openreview-api.md): OpenReview v1/v2 usage details
-- [Distillation Design](.github/skills/venue-distillation/references/distillation-design.md): accepted-paper distillation design
+- [Distillation Design](.github/skills/venue-distillation/references/distillation-design.md): accepted-paper distillation design (Layers 1-3 + Layer 5)
 - [Multi-Discipline Design](.github/skills/venue-distillation/references/multi-discipline.md): schema system for cross-discipline distillation
 - [Rejection Analysis](.github/skills/venue-distillation/references/rejection-analysis.md): rejected-paper weakness extraction
-- [Skill File Format](.github/skills/venue-distillation/references/skill-file-format.md): output skill anatomy and tag layout
+- [Skill File Format](.github/skills/venue-distillation/references/skill-file-format.md): output 5-layer skill anatomy and tag layout
 - [Discipline Schemas](.github/skills/venue-distillation/references/discipline-schemas/): YAML configuration files per discipline family
 
 ## Intended Outcome

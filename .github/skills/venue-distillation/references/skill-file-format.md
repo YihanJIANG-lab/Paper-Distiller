@@ -2,7 +2,7 @@
 
 ## Anatomy of a Generated Skill File
 
-`pipeline/skills/{topic_id}.md` is the pre-compiled output of the entire distillation pipeline. It contains 4 layers wrapped in HTML comment delimiters for programmatic extraction.
+`pipeline/skills/{topic_id}.md` is the pre-compiled output of the entire distillation pipeline. It contains 5 layers wrapped in HTML comment delimiters for programmatic extraction.
 
 ## Structure
 
@@ -107,6 +107,35 @@ Structural elements that strongly differentiate accepted from rejected:
 Rejected papers averaged 5.9 figures and 4.7 tables.
 Rejected papers avg sentence length: 19.8 words.
 <!-- REJECTION_PATTERNS_END -->
+
+---
+
+## Layer 5: Citation & Reference Patterns
+
+<!-- CITATION_PATTERNS_START -->
+[Accepted Paper Reference Counts — 56 papers via OpenAlex API]
+
+Reference list size: median=38, mean=43.4, range=[7-184], IQR=[26-52]
+
+[Rejected Paper Citation Profiles — 120 papers via full text analysis]
+
+Reference list size: median=18, mean=27.0
+Citation density: median=3.06/1k words, mean=3.43/1k words
+Citation style: author_year: 109, mixed: 9, numeric: 2
+Citation distribution across sections:
+  - Related Work: 26.9%
+  - Experiments: 25.9%
+  - Introduction: 18.2%
+  - Method: 11.8%
+
+Introduction citations: ~18.2% of total
+Related Work citations: ~24.4% of total
+Clustered citations ([1,2,3] style): ~14.5%
+Recent references (≤3 years old): ~39.3%
+
+Key insight: Accepted papers cite ~38 references (median),
+vs ~18 in rejected papers — aim for ≥38 references.
+<!-- CITATION_PATTERNS_END -->
 ```
 
 ## Delimiter System
@@ -124,7 +153,7 @@ def _extract_section(content: str, tag: str) -> str:
     return content[start + len(start_marker):end].strip()
 ```
 
-**Tags:** `IDEA_PATTERNS`, `NARRATIVE_PATTERNS`, `REJECTION_PATTERNS`
+**Tags:** `IDEA_PATTERNS`, `NARRATIVE_PATTERNS`, `REJECTION_PATTERNS`, `CITATION_PATTERNS`
 
 Layer 1 (Rigor Facets) is informational only — not currently injected into prompts as a placeholder variable. It informs the `rigor_profiles` in `pipeline_config.yaml` instead.
 
@@ -136,7 +165,7 @@ orchestrator._prepare_prompts()
   ├─ Try: load_skill(workspace, topic_id)
   │   → Read pipeline/skills/{topic_id}.md
   │   → Extract sections via <!-- TAG --> delimiters
-  │   → Return {idea_patterns, narrative_patterns, rejection_patterns}
+  │   → Return {idea_patterns, narrative_patterns, rejection_patterns, citation_patterns}
   │   → FAST: no JSON parsing, no formatting
   │
   └─ Fallback: load_distillation_result() + load_rejected_distillation()
@@ -152,6 +181,7 @@ orchestrator._prepare_prompts()
 | `{idea_patterns}` | S4 (Idea Generation), PAPER_COMPOSE, PAPER_DRAFT | Positive examples: how accepted papers frame ideas |
 | `{narrative_patterns}` | S19 (Paper Revision), PAPER_COMPOSE, PAPER_DRAFT | Positive examples: how accepted papers are structured |
 | `{rejection_patterns}` | S4 (Idea Generation), S19 (Paper Revision) | Negative examples: what to avoid to prevent rejection |
+| `{citation_patterns}` | S19 (Paper Revision), Introduction, Related Work | Reference count targets, citation density, style norms |
 
 ## Regeneration
 

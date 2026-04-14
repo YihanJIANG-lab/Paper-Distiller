@@ -1,8 +1,8 @@
-# 3-Layer Distillation Design
+# Distillation Design (Layers 1-3 LLM + Layer 5 Rule-Based)
 
 ## Architecture Overview
 
-The distillation engine (`pipeline/rigor_distiller.py`) performs a single unified LLM call per paper, extracting 3 layers of structured knowledge simultaneously. This is more cost-effective than 3 separate calls.
+The distillation engine (`pipeline/rigor_distiller.py`) performs a single unified LLM call per paper, extracting 3 layers of structured knowledge simultaneously. This is more cost-effective than 3 separate calls. Layer 5 (Citation & Reference Patterns) is extracted separately via regex and API metadata, with no LLM cost.
 
 ## Layer Definitions
 
@@ -212,3 +212,64 @@ For 200 papers with full text:
 - Total: ~700K input + 100K output tokens
 - Claude Opus 4.6: ~$14 input + $7.50 output = **~$22**
 - GPT-4o: ~$1.75 input + $3.00 output = **~$5**
+
+## Layer 5: Citation & Reference Patterns (Rule-Based)
+
+Layer 5 is extracted **without any LLM calls** using regex on full text + API metadata. It runs after the LLM-based layers and adds zero cost.
+
+### Dataclass
+
+```python
+@dataclass
+class CitationProfile:
+    paper_id: str = ""
+    title: str = ""
+    n_references: int = 0
+    citation_style: str = ""             # "numeric" / "author_year" / "mixed"
+    citation_density_per_1k_words: float = 0.0
+    section_citation_counts: dict[str, int] = field(default_factory=dict)
+    intro_citation_ratio: float = 0.0
+    related_work_citation_ratio: float = 0.0
+    avg_citations_per_paragraph: float = 0.0
+    citation_cluster_ratio: float = 0.0  # [1,2,3] style clustered cites
+    n_self_citations_approx: int = 0
+    recent_year_ratio: float = 0.0       # refs from last 3 years
+```
+
+### Extraction Method
+
+`_extract_citation_profile(paper)` uses 8 regex passes:
+1. Citation style detection (numeric `[1]` vs author-year `(Smith et al., 2024)`)
+2. Reference count (`\bibitem` count or max `[N]`)
+3. Citation density (total citations / words * 1000)
+4. Section-wise citation counts (splits text at section headers)
+5. Per-paragraph average citations
+6. Cluster citation ratio (`[1,2,3]` vs `[1]`)
+7. Recent reference ratio (years ≥2023 / total)
+8. Approximate self-citations (author last names in bibliography)
+
+### Aggregation
+
+`_aggregate_citation_profiles(profiles)` produces:
+```json
+{
+  "n_papers": 60,
+  "reference_count_stats": {"mean": 43.4, "median": 38, "p25": 26, "p75": 52},
+  "citation_style_distribution": {"numeric": 45, "author_year": 12, "mixed": 3},
+  "citation_density_stats": {"mean": 3.43, "median": 3.06},
+  "section_citation_distribution_pct": {"Related Work": 26.9, "Experiments": 25.9, ...},
+  "avg_intro_citation_pct": 18.2,
+  "avg_related_work_citation_pct": 24.4,
+  "avg_cluster_citation_pct": 14.5,
+  "avg_recent_3yr_reference_pct": 39.3
+}
+```
+
+### Dual Source Strategy
+
+When full text is not available (e.g., OpenAlex accepted papers):
+- Fetch `referenced_works_count` from OpenAlex API per paper
+- Produces reference count statistics only (no density/section breakdown)
+- The full-text extraction runs on rejected papers (OpenReview) which always have full text
+
+Both sources are combined in the skill file for a complete accepted-vs-rejected comparison.

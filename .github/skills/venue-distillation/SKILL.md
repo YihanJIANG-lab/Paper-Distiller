@@ -26,11 +26,16 @@ End-to-end methodology for collecting venue papers (accepted + rejected), distil
 │    Layer 4: Rejection Anti-Patterns                         │
 │    (reviewer weaknesses, score distributions, structural    │
 │     gaps vs accepted papers)                                │
+│                                                             │
+│  Both → Rule-based extraction (regex + API, no LLM):       │
+│    Layer 5: Citation & Reference Patterns                   │
+│    (reference counts, citation density, citation style,     │
+│     section distribution, cluster ratio, recency)           │
 └─────────────────────────────────────────────────────────────┘
                           ↓
 ┌─ Phase 3: Package ─────────────────────────────────────────┐
 │  generate_skill() → pipeline/skills/{topic_id}.md          │
-│  4 layers with <!-- TAG_START/END --> delimiters            │
+│  5 layers with <!-- TAG_START/END --> delimiters            │
 └─────────────────────────────────────────────────────────────┘
                           ↓
 ┌─ Phase 4: Inject ──────────────────────────────────────────┐
@@ -38,6 +43,7 @@ End-to-end methodology for collecting venue papers (accepted + rejected), distil
 │    → {idea_patterns}      → S4 Idea Generation             │
 │    → {narrative_patterns} → S19 Paper Revision / COMPOSE   │
 │    → {rejection_patterns} → S4 + S19 (anti-patterns)       │
+│    → {citation_patterns}  → S19 Paper Revision / Intro+RW  │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -174,6 +180,34 @@ This extracts from full text + review data:
 
 See [rejection analysis design](./references/rejection-analysis.md).
 
+### Step 5.5: Extract Citation Profiles (Rule-based, no LLM needed)
+
+Layer 5 extracts citation and reference patterns using regex on full text (rejected / papers with full_text) and API metadata (OpenAlex `referenced_works_count` for accepted papers).
+
+```bash
+# Standalone script (no pipeline dependency):
+python scripts/extract_citation_profiles.py
+
+# Or via the pipeline (integrated into distill_all):
+# Layer 5 is automatically extracted when distill_all() runs.
+```
+
+**What it extracts per paper (from full text):**
+- `n_references` — Total reference count
+- `citation_style` — `numeric` ([1]) / `author_year` (Smith et al., 2024) / `mixed`
+- `citation_density_per_1k_words` — How densely the paper cites
+- `section_citation_counts` — Citations per section (Intro, Related Work, Method, etc.)
+- `intro_citation_ratio` / `related_work_citation_ratio` — Where citations concentrate
+- `citation_cluster_ratio` — Proportion of clustered citations ([1,2,3] style)
+- `recent_year_ratio` — Fraction of references from the last 3 years
+
+**For accepted papers without full text** (e.g., OpenAlex): fetches `referenced_works_count` via API.
+
+**Outputs:**
+- `literature/corpus/topic_N/citation_profiles.json` — Per-paper profiles (full text available)
+- `literature/corpus/topic_N/accepted_citation_meta.json` — API metadata (accepted papers)
+- Updates `distillation_aggregated.json` with `aggregated_citation_patterns`
+
 ### Step 6: Generate Skill File
 
 ```bash
@@ -190,7 +224,7 @@ print(f'Skill generated: {skill_path}')
 "
 ```
 
-**Output:** `pipeline/skills/topic_N.md` — Self-contained skill with 4 layers, ready for orchestrator injection.
+**Output:** `pipeline/skills/topic_N.md` — Self-contained skill with 5 layers, ready for orchestrator injection.
 
 ### Step 7: Verify Integration
 
@@ -200,12 +234,13 @@ from pathlib import Path
 
 ws = Path('.')
 skill = RigorDistiller.load_skill(ws, 'topic_N')
-print(f"idea_patterns:     {len(skill['idea_patterns'])} chars")
-print(f"narrative_patterns: {len(skill['narrative_patterns'])} chars")
-print(f"rejection_patterns: {len(skill['rejection_patterns'])} chars")
+print(f"idea_patterns:      {len(skill['idea_patterns'])} chars")
+print(f"narrative_patterns:  {len(skill['narrative_patterns'])} chars")
+print(f"rejection_patterns:  {len(skill['rejection_patterns'])} chars")
+print(f"citation_patterns:   {len(skill['citation_patterns'])} chars")
 ```
 
-All three should return non-empty strings. The orchestrator will now automatically inject them into prompts at S4 (idea generation) and S19 (paper revision).
+All four should return non-empty strings. The orchestrator will now automatically inject them into prompts at S4 (idea generation), S19 (paper revision), and Introduction/Related Work drafting.
 
 ## Data Flow Reference
 
@@ -216,20 +251,23 @@ literature/corpus/{topic_id}/
 ├── facets.json                         ← Step 4 (Layer 1 raw)
 ├── idea_dna.json                       ← Step 4 (Layer 2 raw)
 ├── narrative_structure.json            ← Step 4 (Layer 3 raw)
-├── distillation_aggregated.json        ← Step 4 (aggregated stats)
+├── distillation_aggregated.json        ← Step 4+5.5 (aggregated stats, incl. citation patterns)
 ├── rejected_distillation.json          ← Step 5 (rejection analysis)
+├── citation_profiles.json              ← Step 5.5 (Layer 5 per-paper profiles)
+├── accepted_citation_meta.json         ← Step 5.5 (Layer 5 API metadata)
 └── rigor_report.md                     ← Step 4 (human-readable report)
 
-pipeline/skills/{topic_id}.md           ← Step 6 (packaged skill)
+pipeline/skills/{topic_id}.md           ← Step 6 (packaged 5-layer skill)
 ```
 
 ## Key Design Decisions
 
 1. **Single LLM call per accepted paper** — Extract 3 layers in one JSON response to minimize API cost
 2. **Rule-based rejected analysis** — No LLM needed; regex + statistics suffice for pattern extraction
-3. **Two-tier loading** — Preformatted `.md` skill (fast) with JSON fallback (runtime formatting)
-4. **HTML comment delimiters** — `<!-- TAG_START -->` / `<!-- TAG_END -->` for section extraction without markdown parsing
-5. **Accepted-vs-rejected comparison** — Most actionable insight: structural elements that differentiate acceptance
+3. **Rule-based citation profiling (Layer 5)** — Pure regex + API metadata; works cross-discipline with no LLM cost
+4. **Two-tier loading** — Preformatted `.md` skill (fast) with JSON fallback (runtime formatting)
+5. **HTML comment delimiters** — `<!-- TAG_START -->` / `<!-- TAG_END -->` for section extraction without markdown parsing
+6. **Accepted-vs-rejected comparison** — Most actionable insight: structural elements that differentiate acceptance
 
 ## Detailed References
 

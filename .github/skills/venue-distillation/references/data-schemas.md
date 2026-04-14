@@ -230,6 +230,32 @@ All data files are stored in `literature/corpus/{topic_id}/`.
       {"title": "Paper Title", "storyline": "Storyline description"}
     ]
   },
+  "aggregated_citation_patterns": {
+    "accepted": {
+      "source": "OpenAlex API metadata",
+      "n_papers": 60,
+      "n_papers_with_ref_data": 56,
+      "reference_count_stats": {
+        "mean": 43.4, "median": 38, "min": 7, "max": 184,
+        "p25": 26, "p75": 52
+      }
+    },
+    "rejected": {
+      "source": "OpenReview full text (regex extraction)",
+      "n_papers": 120,
+      "reference_count_stats": {"mean": 27.0, "median": 18},
+      "citation_density_stats": {"mean": 3.43, "median": 3.06},
+      "citation_style_distribution": {"author_year": 109, "mixed": 9, "numeric": 2},
+      "section_citation_distribution_pct": {
+        "Related Work": 26.9, "Experiments": 25.9,
+        "Introduction": 18.2, "Method": 11.8
+      },
+      "avg_intro_citation_pct": 18.2,
+      "avg_related_work_citation_pct": 24.4,
+      "avg_cluster_citation_pct": 14.5,
+      "avg_recent_3yr_reference_pct": 39.3
+    }
+  },
   "n_papers_analyzed": 238,
   "distilled_at": "2026-04-06T04:47:34"
 }
@@ -309,3 +335,57 @@ All data files are stored in `literature/corpus/{topic_id}/`.
   }
 }
 ```
+
+### Layer 5: Citation Profiles
+
+**File:** `citation_profiles.json` (JSON array — papers with full text)
+
+```json
+[
+  {
+    "paper_id": "rej-ICLR-2024-abc123",
+    "title": "Paper Title",
+    "n_references": 42,
+    "citation_style": "author_year",
+    "citation_density_per_1k_words": 3.5,
+    "section_citation_counts": {
+      "Introduction": 12,
+      "Related Work": 18,
+      "Method": 5,
+      "Experiments": 15,
+      "Conclusion": 3
+    },
+    "intro_citation_ratio": 0.226,
+    "related_work_citation_ratio": 0.340,
+    "avg_citations_per_paragraph": 1.8,
+    "citation_cluster_ratio": 0.15,
+    "n_self_citations_approx": 3,
+    "recent_year_ratio": 0.45
+  }
+]
+```
+
+**File:** `accepted_citation_meta.json` (JSON array — accepted papers via API)
+
+```json
+[
+  {
+    "paper_id": "openalex-W1234567",
+    "title": "Paper Title",
+    "n_references": 38,
+    "cited_by_count": 25,
+    "year": 2024
+  }
+]
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `n_references` | int | Total reference count |
+| `citation_style` | str | `"numeric"` / `"author_year"` / `"mixed"` |
+| `citation_density_per_1k_words` | float | Citations per 1000 words |
+| `section_citation_counts` | dict | Citation count per detected section |
+| `intro_citation_ratio` | float | Fraction of citations in Introduction |
+| `related_work_citation_ratio` | float | Fraction of citations in Related Work |
+| `citation_cluster_ratio` | float | Proportion of multi-ref citations `[1,2,3]` |
+| `recent_year_ratio` | float | Fraction of references from last 3 years |
