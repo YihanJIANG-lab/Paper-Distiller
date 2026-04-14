@@ -14,9 +14,10 @@ Paper-Distiller 将可复用的会议/期刊论文蒸馏工作流打包为工作
 
 1. 从 OpenAlex、Semantic Scholar、OpenReview 采集已接收论文
 2. 从 OpenReview 采集被拒论文及审稿意见
-3. 将已接收论文蒸馏为严谨性、创新性和叙事三层结构化模式
-4. 将被拒论文蒸馏为审稿人关注的反模式
-5. 将结果打包为技能文件，注入 Agent pipeline
+3. 将已接收论文蒸馏为严谨性、创新性和叙事三层结构化模式（Layers 1-3，LLM）
+4. 将被拒论文蒸馏为审稿人关注的反模式（Layer 4，规则）
+5. 提取引用与参考文献模式（Layer 5，正则 + API，无 LLM 成本）
+6. 将五层结果打包为技能文件，注入 Agent pipeline
 
 ## 仓库结构
 
@@ -32,7 +33,7 @@ Paper-Distiller 将可复用的会议/期刊论文蒸馏工作流打包为工作
         discipline-schemas/
           cs.yaml                      # 计算机科学/AI 默认 Schema
           economics.yaml               # 经济学/金融/管理学 Schema
-        distillation-design.md         # 三层蒸馏设计
+        distillation-design.md         # 蒸馏设计（Layers 1-3 + Layer 5）
         multi-discipline.md            # 多学科设计文档
         openreview-api.md              # OpenReview API 指南
         rejection-analysis.md          # 拒稿分析设计
@@ -123,7 +124,7 @@ Use the venue-distillation skill with economics schema for Energy Economics on c
 - [数据 Schema](.github/skills/venue-distillation/references/data-schemas.md)：已接收/被拒论文 JSON 字段定义
 - [采集来源](.github/skills/venue-distillation/references/collection-sources.md)：来源覆盖范围和采集策略
 - [OpenReview API 指南](.github/skills/venue-distillation/references/openreview-api.md)：v1/v2 差异、认证、限流
-- [三层蒸馏设计](.github/skills/venue-distillation/references/distillation-design.md)：LLM prompt、数据类、聚合逻辑
+- [蒸馏设计（Layers 1-3 + Layer 5）](.github/skills/venue-distillation/references/distillation-design.md)：LLM prompt、数据类、聚合逻辑、引用模式提取
 - [多学科设计](.github/skills/venue-distillation/references/multi-discipline.md)：跨学科 Schema 系统
 - [拒稿分析设计](.github/skills/venue-distillation/references/rejection-analysis.md)：正则模式、统计量、对比方法
 - [技能文件格式](.github/skills/venue-distillation/references/skill-file-format.md)：输出技能文件的结构和标签

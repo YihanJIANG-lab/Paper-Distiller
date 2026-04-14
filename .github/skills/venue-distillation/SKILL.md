@@ -17,7 +17,7 @@ End-to-end methodology for collecting venue papers (accepted + rejected), distil
 └─────────────────────────────────────────────────────────────┘
                           ↓
 ┌─ Phase 2: Distill ─────────────────────────────────────────┐
-│  Accepted → LLM 3-layer extraction:                        │
+│  Accepted → LLM Layers 1-3 extraction:                     │
 │    Layer 1: Rigor Facets (baselines, ablation, datasets)   │
 │    Layer 2: Idea DNA (gap→hypothesis reasoning chains)     │
 │    Layer 3: Narrative Structure (figure types, section flow)│
@@ -125,7 +125,7 @@ This script:
 
 See [rejected paper schema](./references/data-schemas.md#rejected-paper-schema) and [OpenReview API guide](./references/openreview-api.md).
 
-### Step 4: Distill Accepted Papers (LLM-based, 3 layers)
+### Step 4: Distill Accepted Papers (LLM-based, Layers 1-3)
 
 ```bash
 # For CS/AI venues (default):
@@ -153,7 +153,7 @@ print(f'Distilled {result.n_papers_analyzed} papers')
 
 The `discipline_family` parameter loads a discipline-specific YAML schema that tailors all 5 layers. See [multi-discipline design](./references/multi-discipline.md).
 
-This performs a **single unified LLM call per paper** extracting 3 layers simultaneously.
+This performs a **single unified LLM call per paper** extracting Layers 1-3 simultaneously.
 
 **Outputs:**
 - `literature/corpus/topic_N/facets.json` — Layer 1 raw data
@@ -161,7 +161,7 @@ This performs a **single unified LLM call per paper** extracting 3 layers simult
 - `literature/corpus/topic_N/narrative_structure.json` — Layer 3 raw data
 - `literature/corpus/topic_N/distillation_aggregated.json` — Aggregated statistics
 
-See [3-layer distillation design](./references/distillation-design.md).
+See [Distillation Design (Layers 1-3 + Layer 5)](./references/distillation-design.md).
 
 ### Step 5: Distill Rejected Papers (Rule-based, no LLM needed)
 
@@ -262,7 +262,7 @@ pipeline/skills/{topic_id}.md           ← Step 6 (packaged 5-layer skill)
 
 ## Key Design Decisions
 
-1. **Single LLM call per accepted paper** — Extract 3 layers in one JSON response to minimize API cost
+1. **Single LLM call per accepted paper** — Extract Layers 1-3 in one JSON response to minimize API cost
 2. **Rule-based rejected analysis** — No LLM needed; regex + statistics suffice for pattern extraction
 3. **Rule-based citation profiling (Layer 5)** — Pure regex + API metadata; works cross-discipline with no LLM cost
 4. **Two-tier loading** — Preformatted `.md` skill (fast) with JSON fallback (runtime formatting)
@@ -274,7 +274,7 @@ pipeline/skills/{topic_id}.md           ← Step 6 (packaged 5-layer skill)
 - [Data Schemas](./references/data-schemas.md) — Full field definitions for all JSON files
 - [Collection Sources](./references/collection-sources.md) — OpenReview, OpenAlex, Semantic Scholar API details
 - [OpenReview API Guide](./references/openreview-api.md) — v1/v2 differences, auth, rate limiting, venue filters
-- [3-Layer Distillation Design](./references/distillation-design.md) — LLM prompts, dataclasses, aggregation logic
+- [Distillation Design (Layers 1-3 + Layer 5)](./references/distillation-design.md) — LLM prompts, dataclasses, aggregation logic, citation extraction
 - [Rejection Analysis Design](./references/rejection-analysis.md) — Regex patterns, metrics, comparison methodology
 - [Skill File Format](./references/skill-file-format.md) — Anatomy of a generated skill .md file
 - [Multi-Discipline Design](./references/multi-discipline.md) — Schema system for cross-discipline distillation

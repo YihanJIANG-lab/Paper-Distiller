@@ -2,7 +2,7 @@
 
 ## Motivation
 
-The original 3-layer distillation was designed for CS/AI venues (NeurIPS, ICML, ICLR). To support journals in economics, finance, management, and other disciplines, we introduced a **discipline schema** system: the 5-layer extraction/aggregation/formatting pipeline stays the same, but each layer's fields, prompt definitions, classification taxonomies, and aggregation rules are loaded from YAML configuration files.
+The original Layers 1-3 distillation was designed for CS/AI venues (NeurIPS, ICML, ICLR). To support journals in economics, finance, management, and other disciplines, we introduced a **discipline schema** system: the 5-layer extraction/aggregation/formatting pipeline stays the same, but each layer's fields, prompt definitions, classification taxonomies, and aggregation rules are loaded from YAML configuration files.
 
 ## Architecture: Unified Engine + Per-Discipline Schema
 

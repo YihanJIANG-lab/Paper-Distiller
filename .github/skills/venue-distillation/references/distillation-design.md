@@ -2,7 +2,7 @@
 
 ## Architecture Overview
 
-The distillation engine (`pipeline/rigor_distiller.py`) performs a single unified LLM call per paper, extracting 3 layers of structured knowledge simultaneously. This is more cost-effective than 3 separate calls. Layer 5 (Citation & Reference Patterns) is extracted separately via regex and API metadata, with no LLM cost.
+The distillation engine (`pipeline/rigor_distiller.py`) performs a single unified LLM call per paper, extracting Layers 1-3 of structured knowledge simultaneously. This is more cost-effective than 3 separate calls. Layer 5 (Citation & Reference Patterns) is extracted separately via regex and API metadata, with no LLM cost.
 
 ## Layer Definitions
 
@@ -208,7 +208,7 @@ Recommended models by budget:
 
 For 200 papers with full text:
 - Input: ~3000 tokens/paper (abstract + intro + experiments)
-- Output: ~500 tokens/paper (3-layer JSON)
+- Output: ~500 tokens/paper (Layers 1-3 JSON)
 - Total: ~700K input + 100K output tokens
 - Claude Opus 4.6: ~$14 input + $7.50 output = **~$22**
 - GPT-4o: ~$1.75 input + $3.00 output = **~$5**
